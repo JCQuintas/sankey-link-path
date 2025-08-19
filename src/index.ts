@@ -1,23 +1,40 @@
 'use client';
 import { path } from 'd3-path';
-import type { SankeyLinkMinimal } from 'd3-sankey';
+import type { SankeyExtraProperties, SankeyLink } from 'd3-sankey';
 
-type AnyParam = Record<string, any>
-
-/**
- */
-export function sankeyLinkPathHorizontal<L extends SankeyLinkMinimal<AnyParam, AnyParam>>(link: L, options: {
+export type SankeyLinkPathOptions = {
   /**
    * Number of interpolated points along the path.
    * @default 10, which creates a decently smooth curve.
    */
-  pathInterpolations: number
-}): string {
+  pathInterpolations?: number;
+};
+
+/**
+ * Generates a horizontal Sankey link path.
+ *
+ * Differently than the `sankeyPathHorizontal` provided by d3-sankey, this function returns
+ * a 2D shape instead of a line.
+ *
+ * @param link - The Sankey link for which to generate the path.
+ * @param options - Options for customizing the path generation.
+ * @returns A string representing the SVG path data for the link.
+ */
+export function sankeyLinkPathHorizontal(
+  link: SankeyLink<{}, {}>,
+  options: SankeyLinkPathOptions
+): string | null;
+export function sankeyLinkPathHorizontal<
+  N extends SankeyExtraProperties,
+  L extends SankeyExtraProperties,
+>(link: SankeyLink<N, L>, options: SankeyLinkPathOptions): string | null {
   if (!link.source || !link.target) {
     throw new Error('Invalid link: source and target are required');
   }
   if (typeof link.source !== 'object' || typeof link.target !== 'object') {
-    throw new Error('Invalid link: source and target must be objects. You might need to run the layout generator first.');
+    throw new Error(
+      'Invalid link: source and target must be objects. You might need to run the layout generator first.'
+    );
   }
 
   const N = options.pathInterpolations ?? 10;
@@ -57,7 +74,7 @@ export function sankeyLinkPathHorizontal<L extends SankeyLinkMinimal<AnyParam, A
       { x: lcx, y: y0 },
       { x: lcx, y: y1 },
       // End point, target node
-      { x: x1, y: y1 },
+      { x: x1, y: y1 }
     );
     guidePoints.push(p);
   }
@@ -71,10 +88,13 @@ export function sankeyLinkPathHorizontal<L extends SankeyLinkMinimal<AnyParam, A
   // bottom ‾‾\__
   for (let i = 0; i < guidePoints.length; i++) {
     // First and last points are horizontal
-    const angle = i === 0 || i === guidePoints.length - 1?0 : getLineAngleRadians(guidePoints[i - 1], guidePoints[i]);
+    const angle =
+      i === 0 || i === guidePoints.length - 1
+        ? 0
+        : getLineAngleRadians(guidePoints[i - 1], guidePoints[i]);
 
-      topPoints.push(movePoint(guidePoints[i]!, angle, halfW, 90, limits));
-      bottomPoints.push(movePoint(guidePoints[i]!, angle, halfW, -90, limits));
+    topPoints.push(movePoint(guidePoints[i]!, angle, halfW, 90, limits));
+    bottomPoints.push(movePoint(guidePoints[i]!, angle, halfW, -90, limits));
   }
 
   // We add the last point again to close the curve
@@ -83,7 +103,7 @@ export function sankeyLinkPathHorizontal<L extends SankeyLinkMinimal<AnyParam, A
 
   // Bottom points are rendered "on the way back"
   // so they need to be reversed.
-  bottomPoints.reverse()
+  bottomPoints.reverse();
 
   // Use catmull-rom to ensure the bezier curve crosses all points.
   const topCurves = catmullRom2bezier(topPoints);
@@ -141,7 +161,7 @@ function movePoint(
   angleRadians: number,
   distance: number,
   changeAngle: number,
-  limits: { x: { min: number; max: number } },
+  limits: { x: { min: number; max: number } }
 ): Point {
   const radians = angleRadians + (changeAngle * Math.PI) / 180;
 
@@ -192,7 +212,10 @@ function catmullRom2bezier(points: Point[]) {
 
     const bp: Point[] = [];
     bp.push({ x: p[1]!.x, y: p[1]!.y });
-    bp.push({ x: (-p[0]!.x + 6 * p[1]!.x + p[2]!.x) / 6, y: (-p[0]!.y + 6 * p[1]!.y + p[2]!.y) / 6 });
+    bp.push({
+      x: (-p[0]!.x + 6 * p[1]!.x + p[2]!.x) / 6,
+      y: (-p[0]!.y + 6 * p[1]!.y + p[2]!.y) / 6,
+    });
     bp.push({ x: (p[1]!.x + 6 * p[2]!.x - p[3]!.x) / 6, y: (p[1]!.y + 6 * p[2]!.y - p[3]!.y) / 6 });
     bp.push({ x: p[2]!.x, y: p[2]!.y });
 
