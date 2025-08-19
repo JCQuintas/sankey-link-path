@@ -1,0 +1,24 @@
+# local script files
+edit.sh
+usage.sh
+
+# tag files
+tags
+
+# documentation
+docs
+
+# test related
+test
+coverage
+
+# production related files
+Makefile
+arkit.*
+.*.json
+.cache
+.ignore
+.coveralls.yml
+.parcel-cache
+.travis.yml
+.github
