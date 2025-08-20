@@ -12,6 +12,7 @@ export default defineConfig({
         'simple-sankey': resolve(__dirname, 'tests/pages/simple-sankey.html'),
         'complex-sankey': resolve(__dirname, 'tests/pages/complex-sankey.html'),
         'different-interpolations': resolve(__dirname, 'tests/pages/different-interpolations.html'),
+        'd3-comparison': resolve(__dirname, 'tests/pages/d3-comparison.html'),
       },
     },
   },

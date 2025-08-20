@@ -41,4 +41,18 @@ test.describe('Sankey Link Path Visual Tests', () => {
     await expect(page.locator('#interp-10').locator('..')).toHaveScreenshot('interpolation-10.png');
     await expect(page.locator('#interp-50').locator('..')).toHaveScreenshot('interpolation-50.png');
   });
+
+  test('d3 vs custom implementation comparison renders correctly', async ({ page }) => {
+    await page.goto('/d3-comparison.html');
+
+    // Wait for all comparison diagrams to be rendered
+    await page.waitForSelector('#d3-sankey .sankey-node');
+    await page.waitForSelector('#custom-sankey .sankey-node');
+    await page.waitForTimeout(1500); // Additional wait for complex rendering
+
+    // Take screenshots of each comparison
+    await expect(page.locator('.comparison-container').first()).toHaveScreenshot(
+      'd3-vs-custom.png'
+    );
+  });
 });
