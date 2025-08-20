@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Complex Sankey Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: white;
+      }
+      .container {
+        width: 1000px;
+        height: 700px;
+        border: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      .sankey-node {
+        fill: #2c3e50;
+        stroke: #34495e;
+        stroke-width: 1px;
+      }
+      .sankey-link {
+        fill: lightslategray;
+        opacity: 0.5;
+        stroke: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Complex Sankey Diagram</h1>
+    <div class="container">
+      <svg id="complex-sankey" width="1000" height="700"></svg>
+    </div>
+
+    <script type="module" src="./complex-sankey.ts"></script>
+  </body>
+</html>

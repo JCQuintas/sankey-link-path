@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Simple Sankey Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: white;
+      }
+      .container {
+        width: 800px;
+        height: 600px;
+        border: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      .sankey-node {
+        fill: #3498db;
+        stroke: #2980b9;
+        stroke-width: 1px;
+      }
+      .sankey-link {
+        fill: lightslategray;
+        opacity: 0.5;
+        stroke: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Simple Sankey Diagram</h1>
+    <div class="container">
+      <svg id="simple-sankey" width="800" height="600"></svg>
+    </div>
+
+    <script type="module" src="./simple-sankey.ts"></script>
+  </body>
+</html>

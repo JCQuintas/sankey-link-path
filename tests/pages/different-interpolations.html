@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Different Interpolations Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: white;
+      }
+      .container {
+        width: 800px;
+        height: 500px;
+        border: 1px solid #ccc;
+        margin: 20px 0;
+        display: inline-block;
+        vertical-align: top;
+      }
+      .sankey-node {
+        fill: #9b59b6;
+        stroke: #8e44ad;
+        stroke-width: 1px;
+      }
+      .sankey-link {
+        fill: lightslategray;
+        opacity: 0.5;
+        stroke: none;
+      }
+      h2 {
+        margin: 10px 0 5px 0;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Different Path Interpolations</h1>
+
+    <div>
+      <h2>2 Interpolations</h2>
+      <div class="container">
+        <svg id="interp-2" width="800" height="500"></svg>
+      </div>
+    </div>
+
+    <div>
+      <h2>3 Interpolations</h2>
+      <div class="container">
+        <svg id="interp-3" width="800" height="500"></svg>
+      </div>
+    </div>
+
+    <div>
+      <h2>10 Interpolations (Default)</h2>
+      <div class="container">
+        <svg id="interp-10" width="800" height="500"></svg>
+      </div>
+    </div>
+
+    <div>
+      <h2>50 Interpolations</h2>
+      <div class="container">
+        <svg id="interp-50" width="800" height="500"></svg>
+      </div>
+    </div>
+
+    <script type="module" src="./different-interpolations.ts"></script>
+  </body>
+</html>

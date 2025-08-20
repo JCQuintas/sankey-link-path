@@ -22,12 +22,12 @@ export type SankeyLinkPathOptions = {
  */
 export function sankeyLinkPathHorizontal(
   link: SankeyLink<{}, {}>,
-  options: SankeyLinkPathOptions
+  options?: SankeyLinkPathOptions
 ): string | null;
 export function sankeyLinkPathHorizontal<
   N extends SankeyExtraProperties,
   L extends SankeyExtraProperties,
->(link: SankeyLink<N, L>, options: SankeyLinkPathOptions): string | null {
+>(link: SankeyLink<N, L>, options?: SankeyLinkPathOptions): string | null {
   if (!link.source || !link.target) {
     throw new Error('Invalid link: source and target are required');
   }
@@ -37,7 +37,16 @@ export function sankeyLinkPathHorizontal<
     );
   }
 
-  const N = options.pathInterpolations ?? 10;
+  let N = 10;
+
+  // Needs an even number to work correctly.
+  if (options && options.pathInterpolations) {
+    if (options.pathInterpolations % 2 !== 0) {
+      N = options.pathInterpolations + 1;
+    } else {
+      N = options.pathInterpolations;
+    }
+  }
 
   // Min and max X of the link
   const x0 = link.source.x1!;
@@ -93,17 +102,17 @@ export function sankeyLinkPathHorizontal<
         ? 0
         : getLineAngleRadians(guidePoints[i - 1], guidePoints[i]);
 
-    topPoints.push(movePoint(guidePoints[i]!, angle, halfW, 90, limits));
-    bottomPoints.push(movePoint(guidePoints[i]!, angle, halfW, -90, limits));
+    topPoints.push(movePoint(guidePoints[i]!, angle, halfW, -90, limits));
+    bottomPoints.push(movePoint(guidePoints[i]!, angle, halfW, 90, limits));
   }
-
-  // We add the last point again to close the curve
-  topPoints.push(movePoint(guidePoints.at(-1)!, 0, halfW, 90, limits));
-  bottomPoints.push(movePoint(guidePoints.at(-1)!, 0, halfW, -90, limits));
 
   // Bottom points are rendered "on the way back"
   // so they need to be reversed.
   bottomPoints.reverse();
+
+  // We add the last point again to close the curve
+  topPoints.push(movePoint(guidePoints.at(-1)!, 0, halfW, -90, limits));
+  bottomPoints.push(movePoint(guidePoints.at(0)!, 0, halfW, 90, limits));
 
   // Use catmull-rom to ensure the bezier curve crosses all points.
   const topCurves = catmullRom2bezier(topPoints);
@@ -183,6 +192,8 @@ function movePoint(
   return { x: newX, y: newY };
 }
 
+const to2 = (v: number) => Number.parseFloat(v.toFixed(2));
+
 function catmullRom2bezier(points: Point[]) {
   const cubicArguments: [number, number, number, number, number, number][] = [];
   for (let i = 0; points.length - 2 > i; i += 1) {
@@ -219,7 +230,14 @@ function catmullRom2bezier(points: Point[]) {
     bp.push({ x: (p[1]!.x + 6 * p[2]!.x - p[3]!.x) / 6, y: (p[1]!.y + 6 * p[2]!.y - p[3]!.y) / 6 });
     bp.push({ x: p[2]!.x, y: p[2]!.y });
 
-    cubicArguments.push([bp[1]!.x, bp[1]!.y, bp[2]!.x, bp[2]!.y, bp[3]!.x, bp[3]!.y]);
+    cubicArguments.push([
+      to2(bp[1]!.x),
+      to2(bp[1]!.y),
+      to2(bp[2]!.x),
+      to2(bp[2]!.y),
+      to2(bp[3]!.x),
+      to2(bp[3]!.y),
+    ]);
   }
 
   return cubicArguments;
