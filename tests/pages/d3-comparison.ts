@@ -115,7 +115,7 @@ function createCustomSankey(
     .enter()
     .append('path')
     .attr('class', 'sankey-link-custom')
-    .attr('d', (d: any) => sankeyLinkPathHorizontal(d, { pathInterpolations: 15 }));
+    .attr('d', (d: any) => sankeyLinkPathHorizontal(d));
 
   // Draw nodes
   svg
