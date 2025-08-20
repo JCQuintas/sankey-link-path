@@ -1,6 +1,48 @@
-import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
+import { path } from 'd3-path';
+import { sankey, sankeyLinkHorizontal, type SankeyLink } from 'd3-sankey';
 import { select } from 'd3-selection';
-import { sankeyLinkPathHorizontal } from '../../src/index.js';
+import { sankeyLinkPathHorizontal } from '../../src';
+
+function naiveSankeyLinkPathHorizontal(link: SankeyLink<{}, {}>) {
+  if (!link.source || !link.target) {
+    throw new Error('Invalid link: source and target are required');
+  }
+  if (typeof link.source !== 'object' || typeof link.target !== 'object') {
+    throw new Error(
+      'Invalid link: source and target must be objects. You might need to run the layout generator first.'
+    );
+  }
+
+  const sx = link.source.x1!;
+  const tx = link.target.x0!;
+  const y0 = link.y0!;
+  const y1 = link.y1!;
+  const w = link.width!;
+  const sy0 = y0 - w / 2;
+  const sy1 = y0 + w / 2;
+  const ty0 = y1 - w / 2;
+  const ty1 = y1 + w / 2;
+
+  const halfX = (tx - sx) / 2;
+
+  let p = path();
+  p.moveTo(sx, sy0);
+
+  let cpx1 = sx + halfX;
+  let cpy1 = sy0;
+  let cpx2 = sx + halfX;
+  let cpy2 = ty0;
+  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, tx, ty0);
+  p.lineTo(tx, ty1);
+
+  cpx1 = sx + halfX;
+  cpy1 = ty1;
+  cpx2 = sx + halfX;
+  cpy2 = sy1;
+  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, sx, sy1);
+  p.lineTo(sx, sy0);
+  return p.toString();
+}
 
 interface NodeData {
   name: string;
@@ -24,9 +66,10 @@ const data: { nodes: NodeData[]; links: LinkData[] } = {
   ],
 };
 
-function createD3Sankey(
+function createSankey(
   svgId: string,
   data: { nodes: NodeData[]; links: LinkData[] },
+  fn: (s: any) => string | null,
   width: number,
   height: number
 ) {
@@ -45,15 +88,24 @@ function createD3Sankey(
 
   const svg = select(`#${svgId}`);
   svg.selectAll('*').remove(); // Clear previous content
+  svg.attr('width', width).attr('height', height);
+
+  const parent = document.querySelector(`#${svgId}`)?.parentElement;
+  if (parent) {
+    parent.style.width = `${width + 100}px`;
+  }
+
+  const linkClass = `${svgId}-link`;
 
   // Draw links using D3's sankeyLinkHorizontal
   svg
-    .selectAll('.sankey-link-d3')
+    .selectAll(`.${linkClass}`)
     .data(links)
     .enter()
     .append('path')
-    .attr('class', 'sankey-link-d3')
-    .attr('d', sankeyLinkHorizontal())
+    .attr('class', linkClass)
+    .attr('class', 'sankey-link')
+    .attr('d', d => fn(d))
     .style('stroke-width', (d: any) => Math.max(1, d.width));
 
   // Draw nodes
@@ -86,67 +138,9 @@ function createD3Sankey(
   return { nodes, links };
 }
 
-function createCustomSankey(
-  svgId: string,
-  data: { nodes: NodeData[]; links: LinkData[] },
-  width: number,
-  height: number
-) {
-  const margin = { top: 20, right: 40, bottom: 20, left: 40 };
-
-  const sankeyGenerator = sankey<NodeData, LinkData>()
-    .nodeWidth(15)
-    .nodePadding(15)
-    .extent([
-      [margin.left, margin.top],
-      [width - margin.right, height - margin.bottom],
-    ]);
-
-  const graph = sankeyGenerator(data);
-  const { nodes, links } = graph;
-
-  const svg = select(`#${svgId}`);
-  svg.selectAll('*').remove(); // Clear previous content
-
-  // Draw links using our custom sankeyLinkPathHorizontal
-  svg
-    .selectAll('.sankey-link-custom')
-    .data(links)
-    .enter()
-    .append('path')
-    .attr('class', 'sankey-link-custom')
-    .attr('d', (d: any) => sankeyLinkPathHorizontal(d));
-
-  // Draw nodes
-  svg
-    .selectAll('.sankey-node')
-    .data(nodes)
-    .enter()
-    .append('rect')
-    .attr('class', 'sankey-node')
-    .attr('x', (d: any) => d.x0)
-    .attr('y', (d: any) => d.y0)
-    .attr('width', (d: any) => d.x1 - d.x0)
-    .attr('height', (d: any) => d.y1 - d.y0);
-
-  // Add labels
-  svg
-    .selectAll('.sankey-label')
-    .data(nodes)
-    .enter()
-    .append('text')
-    .attr('class', 'sankey-label')
-    .attr('x', (d: any) => (d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6))
-    .attr('y', (d: any) => (d.y1 + d.y0) / 2)
-    .attr('dy', '0.35em')
-    .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'start' : 'end'))
-    .style('font-size', '10px')
-    .style('font-weight', 'bold')
-    .text((d: any) => d.name);
-
-  return { nodes, links };
-}
-
 // Create all comparisons
-createD3Sankey('d3-sankey', data, 200, 400);
-createCustomSankey('custom-sankey', data, 200, 400);
+const width = 200;
+const height = 400;
+createSankey('d3-sankey', data, sankeyLinkHorizontal(), width, height);
+createSankey('custom-sankey', data, sankeyLinkPathHorizontal, width, height);
+createSankey('naive-sankey', data, naiveSankeyLinkPathHorizontal, width, height);

@@ -55,12 +55,10 @@ export function sankeyLinkPathHorizontal<
   const y0 = link.y0!;
   const y1 = link.y1!;
   const halfW = link.width! / 2;
-  const targetWidth = link.target.x1! - link.target.x0!;
-  const sourceWidth = link.source.x1! - link.source.x0!;
   const limits = {
     x: {
-      min: x0 - sourceWidth,
-      max: x1 + targetWidth,
+      min: x0,
+      max: x1,
     },
   };
 
@@ -136,16 +134,20 @@ type Point = {
   y: number;
 };
 
-function lerp(val: number, p1: Point, p2: Point) {
-  const x = p1.x + (p2.x - p1.x) * val;
-  const y = p1.y + (p2.y - p1.y) * val;
+function lerp(val: number, v1: number, v2: number) {
+  return v1 + (v2 - v1) * val;
+}
+
+function pointLerp(val: number, p1: Point, p2: Point) {
+  const x = lerp(val, p1.x, p2.x);
+  const y = lerp(val, p1.y, p2.y);
   return { x, y };
 }
 
 function quadratic(val: number, p1: Point, c1: Point, p2: Point) {
-  const x = lerp(val, p1, c1);
-  const y = lerp(val, c1, p2);
-  const l = lerp(val, x, y);
+  const x = pointLerp(val, p1, c1);
+  const y = pointLerp(val, c1, p2);
+  const l = pointLerp(val, x, y);
   return { x: l.x, y: l.y };
 }
 
@@ -153,7 +155,7 @@ function cubic(val: number, p1: Point, c1: Point, c2: Point, p2: Point) {
   const x = quadratic(val, p1, c1, c2);
   const y = quadratic(val, c1, c2, p2);
 
-  const l = lerp(val, x, y);
+  const l = pointLerp(val, x, y);
   return { x: l.x, y: l.y };
 }
 

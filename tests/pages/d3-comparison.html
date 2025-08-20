@@ -8,11 +8,15 @@
         margin: 20px;
         background: white;
       }
+      .parent-container {
+        display: flex;
+        justify-content: start;
+      }
       .comparison-container {
         display: flex;
+        justify-content: space-around;
         gap: 20px;
         margin: 20px 0;
-        max-width: 600px;
       }
       .diagram-container {
         border: 1px solid #ccc;
@@ -20,7 +24,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 250px;
       }
       .diagram-container h3 {
         margin: 0 0 10px 0;
@@ -32,12 +35,12 @@
         stroke: #2980b9;
         stroke-width: 1px;
       }
-      .sankey-link-d3 {
+      #d3-sankey .sankey-link {
         fill: none;
         stroke: lightslategray;
         opacity: 0.5;
       }
-      .sankey-link-custom {
+      .sankey-link {
         fill: lightslategray;
         opacity: 0.5;
         stroke: none;
@@ -46,23 +49,32 @@
   </head>
   <body>
     <h1>D3 vs Custom Implementation Comparison</h1>
-
-    <div class="comparison-container">
-      <div class="diagram-container">
-        <h3>
-          D3 Original
-          <br />
-          sankeyLinkHorizontal
-        </h3>
-        <svg id="d3-sankey" width="200" height="400"></svg>
-      </div>
-      <div class="diagram-container">
-        <h3>
-          Custom
-          <br />
-          sankeyLinkPathHorizontal
-        </h3>
-        <svg id="custom-sankey" width="200" height="400"></svg>
+    <div class="parent-container">
+      <div class="comparison-container">
+        <div class="diagram-container">
+          <h3>
+            D3 Original
+            <br />
+            sankeyLinkHorizontal
+          </h3>
+          <svg id="d3-sankey"></svg>
+        </div>
+        <div class="diagram-container">
+          <h3>
+            Custom
+            <br />
+            sankeyLinkPathHorizontal
+          </h3>
+          <svg id="custom-sankey"></svg>
+        </div>
+        <div class="diagram-container">
+          <h3>
+            Naive
+            <br />
+            naiveSankeyLinkPathHorizontal
+          </h3>
+          <svg id="naive-sankey"></svg>
+        </div>
       </div>
     </div>
 
