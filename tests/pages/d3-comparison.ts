@@ -1,48 +1,6 @@
-import { path } from 'd3-path';
-import { sankey, sankeyLinkHorizontal, type SankeyLink } from 'd3-sankey';
+import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { select } from 'd3-selection';
-import { sankeyLinkPathHorizontal } from '../../src';
-
-function naiveSankeyLinkPathHorizontal(link: SankeyLink<{}, {}>) {
-  if (!link.source || !link.target) {
-    throw new Error('Invalid link: source and target are required');
-  }
-  if (typeof link.source !== 'object' || typeof link.target !== 'object') {
-    throw new Error(
-      'Invalid link: source and target must be objects. You might need to run the layout generator first.'
-    );
-  }
-
-  const sx = link.source.x1!;
-  const tx = link.target.x0!;
-  const y0 = link.y0!;
-  const y1 = link.y1!;
-  const w = link.width!;
-  const sy0 = y0 - w / 2;
-  const sy1 = y0 + w / 2;
-  const ty0 = y1 - w / 2;
-  const ty1 = y1 + w / 2;
-
-  const halfX = (tx - sx) / 2;
-
-  let p = path();
-  p.moveTo(sx, sy0);
-
-  let cpx1 = sx + halfX;
-  let cpy1 = sy0;
-  let cpx2 = sx + halfX;
-  let cpy2 = ty0;
-  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, tx, ty0);
-  p.lineTo(tx, ty1);
-
-  cpx1 = sx + halfX;
-  cpy1 = ty1;
-  cpx2 = sx + halfX;
-  cpy2 = sy1;
-  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, sx, sy1);
-  p.lineTo(sx, sy0);
-  return p.toString();
-}
+import { naiveSankeyLinkPathHorizontal, sankeyLinkPathHorizontal } from '../../src';
 
 interface NodeData {
   name: string;

@@ -61,6 +61,14 @@ export function sankeyLinkPathHorizontal<
       max: x1,
     },
   };
+  const h = link.source.height!;
+  const H = link.source.y0! + link.target.y0!;
+  const W = x1 - x0;
+
+  const isWeird = -2 * H * h * (Math.abs(W) / W) ** 2 + 1.5 * W < 0;
+  if (isWeird) {
+    return naiveSankeyLinkPathHorizontal(link);
+  }
 
   // Center (x) of the link
   const lcx = (x0 + x1) / 2;
@@ -243,4 +251,66 @@ function catmullRom2bezier(points: Point[]) {
   }
 
   return cubicArguments;
+}
+
+export function naiveSankeyLinkPathHorizontal(
+  link: SankeyLink<{}, {}>,
+  options?: {
+    /**
+     * Applies the given number to the control points of the curve function.
+     * This can create better looking links between nodes, but is dependent on the graph layout.
+     * It is specially impacted by the chart height.
+     *
+     * Try experimenting with different values to see how it affects the link curvature.
+     *
+     * @default 5
+     */
+    curveCorrection?: number;
+  }
+) {
+  if (!link.source || !link.target) {
+    throw new Error('Invalid link: source and target are required');
+  }
+  if (typeof link.source !== 'object' || typeof link.target !== 'object') {
+    throw new Error(
+      'Invalid link: source and target must be objects. You might need to run the layout generator first.'
+    );
+  }
+
+  const sx = link.source.x1!;
+  const tx = link.target.x0!;
+  // Weirdly this seems to work for any chart or node width change
+  // But needs to be changed when the sankey height changes.
+  const correction = options?.curveCorrection || 5;
+  const y0 = link.y0!;
+  const y1 = link.y1!;
+  const w = link.width!;
+  const halfW = w / 2;
+  const sy0 = y0 - halfW;
+  const sy1 = y0 + halfW;
+  const ty0 = y1 - halfW;
+  const ty1 = y1 + halfW;
+
+  const halfX = (tx - sx) / 2;
+
+  let p = path();
+  p.moveTo(sx, sy0);
+
+  const isDecreasing = y0 > y1;
+  const direction = isDecreasing ? -1 : 1;
+
+  let cpx1 = sx + halfX + correction * direction;
+  let cpy1 = sy0;
+  let cpx2 = sx + halfX + correction * direction;
+  let cpy2 = ty0;
+  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, tx, ty0);
+  p.lineTo(tx, ty1);
+
+  cpx1 = sx + halfX - correction * direction;
+  cpy1 = ty1;
+  cpx2 = sx + halfX - correction * direction;
+  cpy2 = sy1;
+  p.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, sx, sy1);
+  p.lineTo(sx, sy0);
+  return p.toString();
 }
